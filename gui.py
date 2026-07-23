@@ -145,6 +145,47 @@ class AgenciaEspacialApp:
                 except Error as e:
                     messagebox.showerror("Error SQL", f"Error al consultar el registro:\n{str(e)}")
 
+    def actualizar_agencia(self):
+        agencia_id = self.entry_id.get().strip()
+        nombre = self.entry_nombre.get().strip()
+        pais = self.entry_pais.get().strip()
+        fecha = self.entry_fecha.get().strip()
+
+        if not agencia_id or not nombre or not pais or not fecha:
+            messagebox.showwarning("Advertencia", "Seleccione un registro y asegúrese de completar todos los campos.")
+            return
+
+        try:
+            self.db.actualizar_agencia(int(agencia_id), nombre, pais, fecha)
+            messagebox.showinfo("Éxito", f"Agencia con ID {agencia_id} actualizada correctamente.")
+            self.mostrar_agencias()
+            self.limpiar_campos()
+        except Error as e:
+            messagebox.showerror("Error SQL", f"Error al actualizar el registro:\n{str(e)}")
+
+    def borrar_agencia(self):
+        seleccion = self.lista_agencias.curselection()
+        if not seleccion:
+            messagebox.showwarning("Advertencia", "Seleccione una agencia de la lista para proceder a borrar.")
+            return
+
+        item_seleccionado = self.lista_agencias.get(seleccion[0])
+        agencia_id = extraer_numero_id(item_seleccionado)
+
+        if agencia_id:
+            confirmacion = messagebox.askyesno(
+                "Confirmación de Borrado",
+                f"¿Está seguro de que desea eliminar la agencia con ID {agencia_id}?\nEsta acción no se puede deshacer."
+            )
+
+            if confirmacion:
+                try:
+                    self.db.borrar_agencia(agencia_id)
+                    messagebox.showinfo("Éxito", f"Agencia con ID {agencia_id} borrada correctamente.")
+                    self.mostrar_agencias()
+                    self.limpiar_campos()
+                except Error as e:
+                    messagebox.showerror("Error SQL", f"Error al eliminar el registro:\n{str(e)}")
 
     def limpiar_campos(self):
         self.entry_id.delete(0, tk.END)
